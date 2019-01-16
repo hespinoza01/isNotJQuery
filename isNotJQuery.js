@@ -3,19 +3,28 @@ function $ (selector){
   if(!this instanceof $){ return new $(selector); }
 
   selector = selector || document.body; // Set default value for selector
-  let _$ = (Object.is(selector, document)) // Verify is selector isn't document
-              ? Object.create(_toDocument.prototype)
-              : Object.create($.prototype);
+  let _$ = Object.create($.prototype);
 
   // If using css selectors
   if(typeof selector === "string"){
     let elements = Array.from(document.querySelectorAll(selector));
 
     _$.target = (elements.length === 1) ? elements[0] : elements;
+  }else if(Object.is(selector, document) || Object.is(selector, window)){
+    _$.target = selector;
+  }else{
+    throw new TypeError('Selector argument is not valid');
   }
 
   return _$;
 }
+
+$.prototype.find = function(selector){
+  if(selector === undefined || typeof selector !== "string") return;
+
+  let elements = Array.from(this.target.querySelectorAll(selector));
+  return (elements.length === 1) ? elements[0] : elements;
+};
 
 $.prototype.text = function(value){
   if(value === undefined) return;
@@ -31,31 +40,10 @@ $.prototype.html = function(value){
   return this;
 };
 
-$.prototype.on = function(eventType, callback){
-  if(eventType === undefined || typeof eventType !== "string") return;
-  if(callback === undefined || typeof callback !== "function") return;
 
-  if(this.target.addEventListener){
-    this.target.addEventListener(`${eventType}`, callback);
-  }else if(this.target.attachEvent){
-    this.target.attachEvent('on'+eventType, callback);
-  }
-
-  return this;
-};
-
-$.prototype.off = function(eventType, callback){
-  if(eventType === undefined || typeof eventType !== "string") return;
-  if(callback === undefined || typeof callback !== "function") return;
-
-  if(this.target.addEventListener){
-    this.target.removeEventListener(`${eventType}`, callback);
-  }else if(this.target.attachEvent){
-    // TODO
-  }
-
-  return this;
-};
+/*
+*     Prototype methods for work with elements class
+* */
 
 $.prototype.addClass = function(classname){
   if(classname === undefined || typeof classname !== "string") return;
@@ -78,9 +66,43 @@ $.prototype.toggleClass = function(classname){
   return this;
 };
 
+$.prototype.hasClass = function(classname){
+  if(classname === undefined || typeof classname !== "string") return;
 
-function _toDocument() {}
-_toDocument.prototype.ready = function(callback){
+  return this.target.classList.contains(classname);
+};
+
+
+/*
+*     Prototype methods for work with elements attributes
+* */
+
+$.prototype.attr = function(name, value){
+  if(name === undefined || typeof name !== "string") return;
+  if(typeof value !== "string") return;
+
+  if(value === undefined){
+    return this.target.getAttribute(name);
+  }else{
+    this.target.setAttribute(name, value);
+  }
+};
+
+$.prototype.removeAttr = function(name){
+  if(name === undefined || typeof name !== "string") return;
+
+  this.target.removeAttribute(name);
+};
+
+
+/*
+*     Prototype methods for events control
+* */
+
+$.prototype.ready = function(callback){
+  if(!Object.is(this.target, document)) throw new TypeError('ready is not a function');
+  if(callback === undefined || typeof callback !== "function") return;
+
   function complete(){
     document.removeEventListener('DOMContentLoaded', callback);
   }
@@ -91,6 +113,34 @@ _toDocument.prototype.ready = function(callback){
   });
 };
 
-$(document).ready(function() {
-  $('#title').text('Hello, world');
-});
+$.prototype.on = function(eventType, callback){
+  if(eventType === undefined || typeof eventType !== "string") return;
+  if(callback === undefined || typeof callback !== "function") return;
+
+  this.target.addEventListener(`${eventType}`, callback);
+  return this;
+};
+
+$.prototype.off = function(eventType, callback){
+  if(eventType === undefined || typeof eventType !== "string") return;
+  if(callback === undefined || typeof callback !== "function") return;
+
+  this.target.removeEventListener(`${eventType}`, callback);
+  return this;
+};
+
+
+/*
+*     Prototype method for loop utility
+* */
+$.prototype.each = function(callback){
+  if(callback === undefined || typeof callback !== "function") throw new TypeError("'each' method need a callback argument to run");
+
+  if(this.target.length){
+    for(let i = 0; i < this.target.length; i++){
+      callback(this.target[i]);
+    }
+  }else {
+    callback(this.target);
+  }
+};
