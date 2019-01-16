@@ -24,6 +24,59 @@ $.prototype.text = function(value){
   return this;
 };
 
+$.prototype.html = function(value){
+  if(value === undefined) return;
+
+  this.target.innerHTML = value;
+  return this;
+};
+
+$.prototype.on = function(eventType, callback){
+  if(eventType === undefined || typeof eventType !== "string") return;
+  if(callback === undefined || typeof callback !== "function") return;
+
+  if(this.target.addEventListener){
+    this.target.addEventListener(`${eventType}`, callback);
+  }else if(this.target.attachEvent){
+    this.target.attachEvent('on'+eventType, callback);
+  }
+
+  return this;
+};
+
+$.prototype.off = function(eventType, callback){
+  if(eventType === undefined || typeof eventType !== "string") return;
+  if(callback === undefined || typeof callback !== "function") return;
+
+  if(this.target.addEventListener){
+    this.target.removeEventListener(`${eventType}`, callback);
+  }else if(this.target.attachEvent){
+    // TODO
+  }
+
+  return this;
+};
+
+$.prototype.addClass = function(classname){
+  if(classname === undefined || typeof classname !== "string") return;
+
+  this.target.classList.add(classname);
+  return this;
+};
+
+$.prototype.removeClass = function(classname){
+  if(classname === undefined || typeof classname !== "string") return;
+
+  this.target.classList.remove(classname);
+  return this;
+};
+
+$.prototype.toggleClass = function(classname){
+  if(classname === undefined || typeof classname !== "string") return;
+
+  this.target.classList.toggle(classname);
+  return this;
+};
 
 
 function _toDocument() {}
