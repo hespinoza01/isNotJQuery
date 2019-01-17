@@ -19,6 +19,11 @@ function $ (selector){
   return _$;
 }
 
+
+/*
+*     Others utils prototype methods
+* */
+
 $.prototype.find = function(selector){
   if(selector === undefined || typeof selector !== "string") return;
 
@@ -37,6 +42,57 @@ $.prototype.html = function(value){
   if(value === undefined) return;
 
   this.target.innerHTML = value;
+  return this;
+};
+
+$.prototype.empty = function(){
+  this.target.innerHTML = '';
+  return this;
+};
+
+$.prototype.hide = function(){
+  this.target.style.display = 'none';
+  return this;
+};
+
+$.prototype.show = function(){
+  this.target.style.display = '';
+  return this;
+};
+
+$.prototype.css = function(arg){
+  if(Object.prototype.toString.call(arg) === '[object Array]'){
+    let result = [];
+
+    for(let i=0; i<arg.length; i++){
+      result.push(this.target.style[arg[i]]);
+    }
+
+    return (result.length === 1) ? result[0] : result;
+  }
+
+  if(arguments.length === 1){
+    let data = arguments[0];
+
+    if(data === Object(data)){
+      let keys = Object.keys(data);
+
+      for(let i=0; i<keys.length; i++){
+        this.target.style[keys[i]] = data[keys[i]];
+      }
+    }else if(typeof data === "string"){
+      return this.target.style[data];
+    }
+
+  }else if(arguments.length === 2){
+    let property = arguments[0],
+        value = arguments[1];
+
+    if(typeof property === "string" && ["string", "number"].includes(typeof value)){
+      this.target.style[arguments[0]] = arguments[1];
+    }
+  }
+
   return this;
 };
 
