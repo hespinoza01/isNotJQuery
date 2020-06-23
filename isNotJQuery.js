@@ -2,7 +2,7 @@ function $ (selector){
   // Verify the instance status
   if(!this instanceof $){ return new $(selector); }
 
-  selector = selector || document.body; // Set default value for selector
+  selector = (typeof selector !== "undefined") ? selector : document.body; // Set default value for selector
   let _$ = Object.create($.prototype);
 
   // If using css selectors
@@ -65,7 +65,11 @@ $.prototype.css = function(arg){
     let result = [];
 
     for(let i=0; i<arg.length; i++){
-      result.push(this.target.style[arg[i]]);
+        let value = this.target.style[arg[i]];
+
+        value = (value !== '') ? value : window.getComputedStyle(this.target).getPropertyValue(arg[i]);
+
+        result.push(value);
     }
 
     return (result.length === 1) ? result[0] : result;
@@ -81,7 +85,11 @@ $.prototype.css = function(arg){
         this.target.style[keys[i]] = data[keys[i]];
       }
     }else if(typeof data === "string"){
-      return this.target.style[data];
+      let value = this.target.style[data];
+
+        value = (value !== '') ? value : window.getComputedStyle(this.target).getPropertyValue(data);
+
+      return value;
     }
 
   }else if(arguments.length === 2){
